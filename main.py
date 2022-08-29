@@ -5,12 +5,19 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import csv
 import time
+
+# set up driver and environment variables
 
 load_dotenv()
 s = Service('/Users/andrewbriley/chromedriver')
 driver = webdriver.Chrome(service=s)
+
+# log into linkedin
+
 driver.get('https://linkedin.com/uas/login')
 email = os.getenv('USER_EMAIL')
 password = os.getenv("USER_PASS")
@@ -24,20 +31,31 @@ pword.send_keys(password)
 
 driver.find_element(By.XPATH, "//button[@type='submit']").click()
 
+# find job button and click it
 jobs = driver.find_element(
-    By.XPATH, "//a[contains(@class, 'app-aware-link')]/span")
+    By.XPATH, '//*[@id="global-nav"]/div/nav/ul/li[3]/a')
+
 jobs.click()
 
 job_src = driver.page_source
-soup = BeautifulSoup(job_src, 'html.parser')
-company_list_html = soup.select('.job-card-container__primary-description')
-job_list_html = soup.find_all(class_='job-card-list__title')
-links = soup.select('.base-card__full-link ')
 
-for i, job in enumerate(job_list_html):
-    job_list = []
-    job_list.append(job.get_text())
-    print(job_list)
+# parse HTML to find elements of job post
+soup = BeautifulSoup(job_src, 'html.parser')
+job_cards = soup.select('.job-card-list__entity-lockup ')
+job_list_html = soup.select('.job-card-list__title')
+print(job_list_html)
+
+for card in job_cards:
+    print(card.text)
+
+
+# job_list = []
+# job_list.append(job.get_text())
+# print(job_list)
+
+links = soup.select('.base-card__full-link ')
+company_list_html = soup.select('.job-card-container__primary-description')
+
 
 # def create_job_list(job_list_html, company_list_html, links):
 #     job_list = []
