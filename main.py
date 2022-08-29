@@ -32,6 +32,7 @@ pword.send_keys(password)
 driver.find_element(By.XPATH, "//button[@type='submit']").click()
 
 # find job button and click it
+# Selenium doesn't seem to be clicking properly
 jobs = driver.find_element(
     By.XPATH, '//*[@id="global-nav"]/div/nav/ul/li[3]/a')
 
