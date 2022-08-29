@@ -31,45 +31,47 @@ pword.send_keys(password)
 
 driver.find_element(By.XPATH, "//button[@type='submit']").click()
 
-# find job button and click it
-# Selenium doesn't seem to be clicking properly
-jobs = driver.find_element(
-    By.XPATH, '//*[@id="global-nav"]/div/nav/ul/li[3]/a')
+driver.get('https://www.linkedin.com/jobs/collections/recommended/')
+# web driver waits to perform next action until it can find elements w/ speciifc class
+try:
+    WebDriverWait.until(EC.presence_of_all_elements_located((
+        By.CLASS_NAME, 'job-card-list__title')))
 
-jobs.click()
+except Exception as e:
+    print(e)
+
+# simulate scrolling
+driver.execute_script(
+    'res = document.querySelector("#main > div > section.scaffold-layout__list > div"); res.scrollTo(0, res.scrollHeight)')
+time.sleep(2)
 
 job_src = driver.page_source
 
 # parse HTML to find elements of job post
 soup = BeautifulSoup(job_src, 'html.parser')
-job_cards = soup.select('.job-card-list__entity-lockup ')
+job_cards = soup.select('.job-card-list__entity-lockup')
 job_list_html = soup.select('.job-card-list__title')
-print(job_list_html)
-
-for card in job_cards:
-    print(card.text)
-
-
-# job_list = []
-# job_list.append(job.get_text())
-# print(job_list)
-
-links = soup.select('.base-card__full-link ')
-company_list_html = soup.select('.job-card-container__primary-description')
-
-
-# def create_job_list(job_list_html, company_list_html, links):
+# for job in job_list_html:
 #     job_list = []
-#     for i, j in enumerate(job_list_html):
-#         job_list.append([i, j.get_text().strip(), i+1])
-#     for i, c in enumerate(company_list_html):
-#         job_list[i][0] = c.get_text().strip()
-#     for i, l in enumerate(links):
-#         job_list[i][2] = l.get('href')
-#     return job_list
+#     job_list.append(job.text)
+#     print(job_list)
+
+links = soup.select('.job-card-container__link')
+company_list_html = soup.select('.job-card-container__company-name')
 
 
-# print(create_job_list(job_list_html, company_list_html, links))
+def create_job_list(job_list_html, company_list_html, links):
+    job_list = []
+    for i, j in enumerate(job_list_html):
+        job_list.append([i, j.get_text().strip()])
+    for i, c in enumerate(company_list_html):
+        job_list[i][0] = c.get_text().strip()
+    for i, l in enumerate(links):
+        job_list[i].append(l.get('href'))
+    return job_list
+
+
+print(create_job_list(job_list_html, company_list_html, links))
 
 # header = ['Company Name', 'Job Title',  'URL']
 # data = create_job_list(jobs, companies, links)
