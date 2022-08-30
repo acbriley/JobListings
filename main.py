@@ -1,3 +1,4 @@
+from cgitb import text
 import requests
 from dotenv import load_dotenv
 import os
@@ -32,20 +33,20 @@ pword.send_keys(password)
 driver.find_element(By.XPATH, "//button[@type='submit']").click()
 
 driver.get('https://www.linkedin.com/jobs/search/?currentJobId=3235585779&distance=25&f_E=2%2C3&f_TPR=r604800&geoId=105088894&keywords=software%20developer&location=Barcelona%2C%20Catalonia%2C%20Spain&refresh=true&sortBy=DD')
+driver.set_window_size(1920, 1080)
 
 # web driver waits to perform next action until it can find elements w/ speciifc class
 try:
     WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((
-        By.CLASS_NAME, 'job-card-list__title')))
+        By.CLASS_NAME, 'job-card-container')))
 
 except Exception as e:
     print(e)
 
 # simulate scrolling
 driver.execute_script(
-    'res = document.querySelector("#main > div > section.scaffold-layout__list > div"); res.scrollTo(0, res.scrollHeight)')
+    'res = document.querySelector("#main > div > section.scaffold-layout__list > div"); res.scrollBy(0, 1080)')
 time.sleep(2)
-
 job_src = driver.page_source
 
 # parse HTML to find elements of job post
