@@ -34,13 +34,13 @@ driver.find_element(By.XPATH, "//button[@type='submit']").click()
 driver.get('https://www.linkedin.com/jobs/collections/recommended/')
 # web driver waits to perform next action until it can find elements w/ speciifc class
 try:
-    WebDriverWait.until(EC.presence_of_all_elements_located((
+    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((
         By.CLASS_NAME, 'job-card-list__title')))
 
 except Exception as e:
     print(e)
 
-# simulate scrolling
+# # simulate scrolling
 driver.execute_script(
     'res = document.querySelector("#main > div > section.scaffold-layout__list > div"); res.scrollTo(0, res.scrollHeight)')
 time.sleep(2)
@@ -49,14 +49,10 @@ job_src = driver.page_source
 
 # parse HTML to find elements of job post
 soup = BeautifulSoup(job_src, 'html.parser')
-job_cards = soup.select('.job-card-list__entity-lockup')
-job_list_html = soup.select('.job-card-list__title')
-# for job in job_list_html:
-#     job_list = []
-#     job_list.append(job.text)
-#     print(job_list)
 
-links = soup.select('.job-card-container__link')
+job_list_html = soup.select('.job-card-list__title')
+# chain 2 classes to get only job post link
+links = soup.select('.job-card-container__link.job-card-list__title')
 company_list_html = soup.select('.job-card-container__company-name')
 
 
@@ -67,17 +63,18 @@ def create_job_list(job_list_html, company_list_html, links):
     for i, c in enumerate(company_list_html):
         job_list[i][0] = c.get_text().strip()
     for i, l in enumerate(links):
-        job_list[i].append(l.get('href'))
+        link = l.get('href')
+        job_list[i].append('https://linkedin.com' + link)
     return job_list
 
 
-print(create_job_list(job_list_html, company_list_html, links))
+header = ['Company Name', 'Job Title',  'URL']
+data = create_job_list(job_list_html, company_list_html, links)
 
-# header = ['Company Name', 'Job Title',  'URL']
-# data = create_job_list(jobs, companies, links)
+with open('linkedin-jobs.csv', 'w', encoding='UTF8', newline='') as f:
+    writer = csv.writer(f)
 
-# with open('jobs.csv', 'w', encoding='UTF8', newline='') as f:
-#     writer = csv.writer(f)
+    writer.writerow(header)
+    writer.writerows(data)
 
-#     writer.writerow(header)
-#     writer.writerows(data)
+driver.close()
