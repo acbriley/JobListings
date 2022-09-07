@@ -1,5 +1,3 @@
-from cgitb import text
-import requests
 from dotenv import load_dotenv
 import os
 from bs4 import BeautifulSoup
@@ -57,6 +55,8 @@ job_list_html = soup.select('.job-card-list__title')
 links = soup.select('.job-card-container__link.job-card-list__title')
 company_list_html = soup.select('.job-card-container__company-name')
 
+# function to add job information into a list
+
 
 def create_job_list(job_list_html, company_list_html, links):
     job_list = []
@@ -71,9 +71,9 @@ def create_job_list(job_list_html, company_list_html, links):
 
 
 # CSV file logic
-header = ['Company Name', 'Job Title',  'URL']
+header = ['Company Name', 'Job Title',  'LinkedIn URL']
 data = create_job_list(job_list_html, company_list_html, links)
-
+# create CSV file w/ writing mode
 with open('linkedin-jobs.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
 
