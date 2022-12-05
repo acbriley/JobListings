@@ -2,6 +2,7 @@ from turtle import pos
 from dotenv import load_dotenv
 import os
 from selenium import webdriver
+import chromedriver_autoinstaller
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,8 +13,8 @@ import pandas as pd
 # set up driver and environment variables
 
 load_dotenv()
-s = Service('/Users/andrewbriley/downloads/chromedriver')
-driver = webdriver.Chrome(service=s)
+chromedriver_autoinstaller.install()
+driver = webdriver.Chrome()
 
 # log into linkedin
 
