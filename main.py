@@ -8,7 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from datetime import date
 import pandas as pd
+import re
 
 # set up driver and environment variables
 
@@ -43,9 +45,8 @@ except Exception as e:
     print(e)
 
 links = []
-companies = []
-positions = []
-for page in range(2, 3):
+jobs_info = []
+for page in range(2, 11):
     print(f"Scraping Page: {page}")
     jobs_list = driver.find_elements(
         By.CSS_SELECTOR, '.jobs-search-results__list-item')
@@ -55,20 +56,8 @@ for page in range(2, 3):
         driver.execute_script("arguments[0].scrollIntoView();", jobs_list[n-1])
     time.sleep(10)
 
-    job_position_element = driver.find_elements(
-        By.CLASS_NAME, 'job-card-list__title')
-    company_element = driver.find_elements(
-        By.CLASS_NAME, 'job-card-container__company-name')
     link_element = driver.find_elements(
         By.CLASS_NAME, 'job-card-container__link')
-    assert len(job_position_element) == len(company_element)
-    assert len(company_element) == len(link_element)
-
-    for job in job_position_element:
-        positions.append(job.get_property('innerHTML').strip())
-
-    for company in company_element:
-        companies.append(company.get_property('innerHTML').strip())
 
     for link in link_element:
         if link.get_property('href') not in links and link.get_property('href').startswith('https://www.linkedin.com/jobs/view'):
@@ -77,17 +66,48 @@ for page in range(2, 3):
     driver.find_element(By.XPATH,
                         f"//button[@aria-label='Page {page}']").click()
     time.sleep(3)
+for link in links:
+    driver.get(link)
+    time.sleep(2)
+    try:
+        if not driver.find_element(
+                By.CSS_SELECTOR, '.jobs-unified-top-card__job-title'):
+            break
+        else:
+            job_title = driver.find_element(
+                By.CSS_SELECTOR, '.jobs-unified-top-card__job-title').text
+            company = driver.find_element(
+                By.CSS_SELECTOR, '.jobs-unified-top-card__company-name'
+            ).text
+            location = driver.find_element(
+                By.CSS_SELECTOR, '.jobs-unified-top-card__bullet').get_property('innerHTML').strip()
+            job_details = driver.find_element(
+                By.CSS_SELECTOR, '#job-details').get_property('innerHTML')
+            if driver.find_element(
+                    By.CSS_SELECTOR, '.jobs-unified-top-card__workplace-type'):
+                workplace_type = driver.find_element(
+                    By.CSS_SELECTOR, '.jobs-unified-top-card__workplace-type').text
+            else:
+                workplace_type = ' '
+            pattern = '<.*?>'
+            job_details = re.sub(pattern, '', job_details)
+            second_pattern = '\n'
+            job_details = re.sub(second_pattern, '', job_details).strip()
+            url = driver.current_url
+            jobs_info.append(
+                (job_title, company, location, workplace_type,  url, job_details))
+    except Exception as err:
+        print(err)
 
-print(len(positions))
-print(len(companies))
-print(len(links))
-job_results = pd.DataFrame({
-    'Job Title': positions,
-    'Hiring Company': companies,
-    'Links': links
-})
+
+print(len(jobs_info))
+
+
+job_results = pd.DataFrame(
+    jobs_info, columns=['Position', 'Company', 'Location', 'Workplace Type', 'Link', 'Job Details'])
 
 # create an excel file
-job_results.to_excel('linkedin-jobs.xlsx', index=False)
+job_results.to_excel('data/linkedin-jobs' +
+                     str(date.today()) + '.xlsx', index=False)
 
 driver.close()
