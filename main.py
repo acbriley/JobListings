@@ -45,7 +45,7 @@ except Exception as e:
 links = []
 companies = []
 positions = []
-for page in range(2, 11):
+for page in range(2, 3):
     print(f"Scraping Page: {page}")
     jobs_list = driver.find_elements(
         By.CSS_SELECTOR, '.jobs-search-results__list-item')
@@ -57,16 +57,19 @@ for page in range(2, 11):
 
     job_position_element = driver.find_elements(
         By.CLASS_NAME, 'job-card-list__title')
+    company_element = driver.find_elements(
+        By.CLASS_NAME, 'job-card-container__company-name')
+    link_element = driver.find_elements(
+        By.CLASS_NAME, 'job-card-container__link')
+    assert len(job_position_element) == len(company_element)
+    assert len(company_element) == len(link_element)
+
     for job in job_position_element:
         positions.append(job.get_property('innerHTML').strip())
 
-    company_element = driver.find_elements(
-        By.CLASS_NAME, 'job-card-container__company-name')
     for company in company_element:
         companies.append(company.get_property('innerHTML').strip())
 
-    link_element = driver.find_elements(
-        By.CLASS_NAME, 'job-card-container__link')
     for link in link_element:
         if link.get_property('href') not in links and link.get_property('href').startswith('https://www.linkedin.com/jobs/view'):
             links.append(link.get_property('href').strip())
@@ -75,6 +78,9 @@ for page in range(2, 11):
                         f"//button[@aria-label='Page {page}']").click()
     time.sleep(3)
 
+print(len(positions))
+print(len(companies))
+print(len(links))
 job_results = pd.DataFrame({
     'Job Title': positions,
     'Hiring Company': companies,
