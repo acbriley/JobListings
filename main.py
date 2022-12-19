@@ -1,9 +1,7 @@
-from turtle import pos
 from dotenv import load_dotenv
 import os
 from selenium import webdriver
 import chromedriver_autoinstaller
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -98,9 +96,6 @@ for link in links:
                 (job_title, company, location, workplace_type,  url, job_details))
     except Exception as err:
         print(err)
-
-
-print(len(jobs_info))
 
 
 job_results = pd.DataFrame(
