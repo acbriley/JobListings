@@ -44,7 +44,7 @@ except Exception as e:
 
 links = []
 jobs_info = []
-for page in range(2, 11):
+for page in range(2, 3):
     print(f"Scraping Page: {page}")
     jobs_list = driver.find_elements(
         By.CSS_SELECTOR, '.jobs-search-results__list-item')
