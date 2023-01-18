@@ -44,7 +44,7 @@ except Exception as e:
 
 links = []
 jobs_info = []
-for page in range(2, 3):
+for page in range(2, 11):
     print(f"Scraping Page: {page}")
     jobs_list = driver.find_elements(
         By.CSS_SELECTOR, '.jobs-search-results__list-item')
@@ -99,8 +99,11 @@ for link in links:
 
 
 job_results = pd.DataFrame(
-    jobs_info, columns=['Position', 'Company', 'Location', 'Workplace Type', 'Link', 'Job Details'])
+    jobs_info, columns=['title', 'company', 'location', 'workplace', 'link', 'details'])
 
+# output json
+job_results.to_json('data/linkedin-jobs' +
+                    str(date.today()) + '.json', orient="records")
 # create an excel file
 job_results.to_excel('data/linkedin-jobs' +
                      str(date.today()) + '.xlsx', index=False)
